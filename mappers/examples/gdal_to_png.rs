@@ -37,7 +37,7 @@ fn main() {
     let colorizer = SimpleScale::new(0.0, 128.0);
     let imgbuf = colorizer.colorize(&rv.data, size);
 
-    // Save the image as “fractal.png”
+    // Save the image
     let ref mut fout = File::create(&Path::new(IMAGE_OUT)).unwrap();
 
     // We must indicate the image’s color type and what format to save as
