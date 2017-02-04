@@ -1,0 +1,16 @@
+[package]
+name = "mappers"
+version = "0.1.0"
+authors = ["Johannes Drönner <droenner@informatik.uni-marburg.de>"]
+
+[dependencies]
+num = "0.1"
+num-traits = "0.1"
+typemap = "0.3"
+params = "0.6.0"
+iron = "*"
+router = "*"
+image = "0.10.4"
+chrono = "0.2"
+colorizers = {path = "../colorizers"}
+gdal =  {git = "https://github.com/georust/rust-gdal.git"}

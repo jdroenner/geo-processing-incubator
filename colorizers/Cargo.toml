@@ -1,0 +1,8 @@
+[package]
+name = "colorizers"
+version = "0.1.0"
+authors = ["Johannes Drönner <droenner@informatik.uni-marburg.de>"]
+
+[dependencies]
+image = "0.10.4"
+num-traits = "0.1.36"
