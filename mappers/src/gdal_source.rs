@@ -8,7 +8,7 @@ use num::Integer;
 use chrono::*;
 use mappers_handler::BoundingBox;
 
-#[derive(Eq, PartialEq, Debug, Clone, Copy)]
+#[derive(Eq, PartialEq, Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Tick {
     pub year: i32,
     pub month: u32,
@@ -88,9 +88,10 @@ impl <T> Rasterized for SpatioTemporalRasterQuery<T> {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SourceParams {
-    pub dataset_name: &'static str,
-    pub file_name_format: &'static str,
+    pub dataset_name: String,
+    pub file_name_format: String,
     pub tick: Option<Tick>,
 }
 
@@ -111,13 +112,12 @@ impl <'a> GdalSource <'a> {
     pub fn pull<T>(&self, query: &SpatioTemporalRasterQuery<T>) -> gdal::errors::Result<Vec<f32>> where T: Timelike + Datelike {
 
         // combine base path and layer name to the full path of the raster and create a Path object.
-        let file_name = self.params.tick.map(|t| t.snap_datetime(query.start()).format(self.params.file_name_format).to_string()).unwrap_or(self.params.dataset_name.to_owned());
+        let file_name = self.params.tick.map(|t| t.snap_datetime(query.start()).format(&self.params.file_name_format).to_string()).unwrap_or(self.params.dataset_name.clone());
 
-        let full_file_path = self.base_path.to_string() + &file_name;
-        let path = Path::new(&full_file_path);
+        let path = Path::new(self.base_path).join(&file_name);
 
         // open the dataset at path (or 'throw' an error)
-        let dataset = Dataset::open(path)?;
+        let dataset = Dataset::open(&path)?;
         // get the geo transform (pixel size ...) of the dataset (or 'throw' an error)
         let geo_transform = dataset.geo_transform()?;
 

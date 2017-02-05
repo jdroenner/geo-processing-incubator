@@ -1,3 +1,6 @@
+use std::path::Path;
+use std::fs::File;
+
 use iron::prelude::*;
 use iron::{Handler, status};
 use iron::headers::ContentType;
@@ -11,6 +14,8 @@ use params::{Value, FromValue};
 use chrono::*;
 
 use gdal_source::*;
+
+use serde_json;
 
 // A struct representing a bounding box
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -99,17 +104,28 @@ impl Handler for MappersHandler {
         println!("chrono_time: {:?}", chrono_time);       
 
         // get source params
-        /*
+        
         let source_params = match map.find(&["layer"]) {
-            Some(&Value::String(ref name)) => name,
-            _ => "meh.tif",
+            Some(&Value::String(ref name)) => {
+                println!("layer name: {}", name);
+                let config_path = Path::new(&self.base_path).join(name);
+                println!("layer config_path: {:?}", config_path);
+                let f = File::open(config_path).unwrap();
+                serde_json::from_reader(f).unwrap()
+            },
+            _ => SourceParams {
+                    dataset_name: String::from("tinymarble"),
+                    file_name_format: String::from("tinymarble.png"),
+                    tick: None
+                }
         };
-        */
+        
 
         // TODO: get this from JSON -> add serde for Params...
+        /*
         let source_params = SourceParams {
-                dataset_name: "Meteosat",
-                file_name_format: "msg_%Y%m%d_%H%M.tif",
+                dataset_name: String::from("Meteosat"),
+                file_name_format: String::from("msg_%Y%m%d_%H%M.tif"),
                 tick: Some(Tick{
                     year: 1,
                     month: 1,
@@ -119,6 +135,7 @@ impl Handler for MappersHandler {
                     second: 60,
                 }),
         };
+        */
 
         // construct the source
         let source = GdalSource::new(&self.base_path, source_params);

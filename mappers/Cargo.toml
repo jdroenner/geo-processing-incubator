@@ -15,3 +15,6 @@ chrono = "0.2"
 colorizers = {path = "../colorizers"}
 gdal =  {git = "https://github.com/georust/rust-gdal.git"}
 config = "0.2"
+serde = "0.9"
+serde_derive = "0.9"
+serde_json = "0.9"
