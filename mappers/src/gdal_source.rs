@@ -1,7 +1,6 @@
 use std::path::Path;
-use std::fs::File;
 use gdal::raster::{Dataset, RasterBand};
-use gdal::metadata::Metadata;
+//use gdal::metadata::Metadata;
 use gdal;
 
 use num::Integer;
@@ -145,7 +144,7 @@ impl GdalSource {
 
 
 
-fn projection_to_raster_space(coordinate: (f64, f64), geo_transform: [f64; 6]) -> (usize, usize) {
+pub fn projection_to_raster_space(coordinate: (f64, f64), geo_transform: [f64; 6]) -> (usize, usize) {
     // calculate the inverse (handling det=0 would also be required)
     let det = geo_transform[1] * geo_transform[5] - geo_transform[2] * geo_transform[4];
     let pixel_x = ((coordinate.0 - geo_transform[0]) * geo_transform[5] -
@@ -156,7 +155,7 @@ fn projection_to_raster_space(coordinate: (f64, f64), geo_transform: [f64; 6]) -
     (pixel_x as usize, pixel_y as usize)
 }
 
-fn raster_to_projection_space(pixel: (usize, usize), geo_transform: [f64; 6]) -> (f64, f64) {
+pub fn raster_to_projection_space(pixel: (usize, usize), geo_transform: [f64; 6]) -> (f64, f64) {
     let x_projection = geo_transform[0] + pixel.0 as f64 * geo_transform[1] +
                        pixel.1 as f64 * geo_transform[2];
     let y_projection = geo_transform[3] + pixel.0 as f64 * geo_transform[4] +

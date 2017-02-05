@@ -1,10 +1,7 @@
 use iron::prelude::*;
-use iron::{Handler, Url, status};
+use iron::{Handler, status};
 use iron::headers::ContentType;
 use image;
-
-use std::path::Path;
-use std::fs::File;
 
 use colorizers::gray_scale::{MinMaxScale};
 use colorizers::Colorizer;
@@ -127,8 +124,7 @@ impl Handler for MappersHandler {
         let source = GdalSource::new(self.base_path, source_params);
 
         // construct the query
-        let query = SpatioTemporalRasterQuery{start_time: chrono_time, bbox: wms_bbox, pixel_size: (wms_width, wms_height)};   
-        
+        let query = SpatioTemporalRasterQuery{start_time: chrono_time, bbox: wms_bbox, pixel_size: (wms_width, wms_height)};
         
         // call a (raster) source and handle the result.
         match source.pull(&query) {
@@ -153,7 +149,7 @@ impl Handler for MappersHandler {
             }
             // result is an error. Return an error to Iron.
             Err(e) => {
-                let resp = Response::with((status::Ok, format!("error: {:?}",e)));
+                let resp = Response::with((status::Ok, format!("source error: {}", e)));
                 Ok(resp)
             },
         }
