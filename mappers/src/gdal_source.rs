@@ -94,13 +94,13 @@ pub struct SourceParams {
     pub tick: Option<Tick>,
 }
 
-pub struct GdalSource {
-    base_path: &'static str,
+pub struct GdalSource <'a> {
+    base_path: &'a str,
     params: SourceParams,
 }
 
-impl GdalSource {
-    pub fn new(base_path: &'static str, params: SourceParams) -> Self {
+impl <'a> GdalSource <'a> {
+    pub fn new(base_path: &'a str, params: SourceParams) -> Self {
         GdalSource {
             base_path: base_path,
             params: params,
