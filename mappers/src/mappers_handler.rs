@@ -121,7 +121,7 @@ impl Handler for MappersHandler {
         };
 
         // construct the source
-        let source = GdalSource::new(self.base_path.clone(), source_params);
+        let source = GdalSource::new(&self.base_path, source_params);
 
         // construct the query
         let query = SpatioTemporalRasterQuery{start_time: chrono_time, bbox: wms_bbox, pixel_size: (wms_width, wms_height)};
