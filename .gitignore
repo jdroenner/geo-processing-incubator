@@ -3,4 +3,4 @@ target
 Cargo.lock
 /.project
 /mappers/.project
-/mappers/.settings/com.github.rustdt.ide.core.prefs
+/mappers/.settings
