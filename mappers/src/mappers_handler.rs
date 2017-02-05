@@ -71,11 +71,11 @@ impl FromValue for BoundingBox {
 // A struct representing a mappers iron handler.
 #[derive(Debug, Clone)]
 pub struct MappersHandler {
-    base_path: &'static str,
+    base_path: String,
 }
 
 impl MappersHandler {
-    pub fn new(base_path: &'static str) -> Self {
+    pub fn new(base_path: String) -> Self {
         MappersHandler { base_path: base_path }
     }
 }
@@ -124,7 +124,7 @@ impl Handler for MappersHandler {
         };
 
         // construct the source
-        let source = GdalSource::new(self.base_path, source_params);
+        let source = GdalSource::new(self.base_path.clone(), source_params);
 
         // construct the query
         let query = SpatioTemporalRasterQuery{start_time: chrono_time, bbox: wms_bbox, pixel_size: (wms_width, wms_height)};   

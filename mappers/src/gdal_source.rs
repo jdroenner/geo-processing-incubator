@@ -96,12 +96,12 @@ pub struct SourceParams {
 }
 
 pub struct GdalSource {
-    base_path: &'static str,
+    base_path: String,
     params: SourceParams,
 }
 
 impl GdalSource {
-    pub fn new(base_path: &'static str, params: SourceParams) -> Self {
+    pub fn new(base_path:String, params: SourceParams) -> Self {
         GdalSource {
             base_path: base_path,
             params: params,
