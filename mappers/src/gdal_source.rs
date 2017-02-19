@@ -3,6 +3,8 @@ use gdal::raster::{Dataset, RasterBand};
 //use gdal::metadata::Metadata;
 use gdal;
 
+use errors::*;
+
 use num::Integer;
 
 use chrono::*;
@@ -109,7 +111,7 @@ impl <'a> GdalSource <'a> {
     }
 
     // A simple mockup source based on GDAL.
-    pub fn pull<T>(&self, query: &SpatioTemporalRasterQuery<T>) -> gdal::errors::Result<Vec<f32>> where T: Timelike + Datelike {
+    pub fn pull<T>(&self, query: &SpatioTemporalRasterQuery<T>) -> Result<Vec<f32>> where T: Timelike + Datelike {
 
         // combine base path and layer name to the full path of the raster and create a Path object.
         let file_name = self.params.tick.map(|t| t.snap_datetime(query.start()).format(&self.params.file_name_format).to_string()).unwrap_or(self.params.dataset_name.clone());
@@ -137,7 +139,8 @@ impl <'a> GdalSource <'a> {
                             (max.0 - min.0, max.1 - min.1), // pixelspace size
                             size /* requested raster size */);
         println!("pixel_origin: {:?}, pixel_size: {:?}, size: {:?}", pixel_origin, pixel_size, size);
-        buffer.map(|b| b.data)
+        let data = buffer.map(|b| b.data)?;
+        Ok(data)
                          // map the returned object to the included Vec.
     }
 }

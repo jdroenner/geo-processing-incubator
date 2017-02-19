@@ -12,6 +12,7 @@ use colorizers::Colorizer;
 use params::{Value, FromValue};
 
 use chrono::*;
+use errors::*;
 
 use gdal_source::*;
 
@@ -80,6 +81,15 @@ impl MappersHandler {
     pub fn new(base_path: String) -> Self {
         MappersHandler { base_path: base_path }
     }
+
+    fn load_params_from_json<'a>(&self, dataset_name: &'a str) -> Result<SourceParams> {
+        println!("load_params_from_json: layer name: {}", dataset_name);
+        let config_path = Path::new(&self.base_path).join(dataset_name);
+        println!("load_params_from_json: layer config_path: {:?}", config_path);
+        let f = File::open(config_path)?;
+        let params = serde_json::from_reader(f)?;
+        Ok(params)
+    }
 }
 
 impl Handler for MappersHandler {
@@ -88,8 +98,6 @@ impl Handler for MappersHandler {
         use params::Params;
         // get a reference to the map holding the params (e.g. url encoded)
         let map = req.get_ref::<Params>().unwrap();
-
-
 
         // get other wms params from the params map.
         let wms_width = map.find(&["width"]).and_then(|w| u64::from_value(w)).unwrap_or(256);
@@ -103,48 +111,19 @@ impl Handler for MappersHandler {
         }).unwrap();
         println!("chrono_time: {:?}", chrono_time);       
 
-        // get source params
-        
-        let source_params = match map.find(&["layer"]) {
-            Some(&Value::String(ref name)) => {
-                println!("layer name: {}", name);
-                let config_path = Path::new(&self.base_path).join(name);
-                println!("layer config_path: {:?}", config_path);
-                let f = File::open(config_path).unwrap();
-                serde_json::from_reader(f).unwrap()
-            },
-            _ => SourceParams {
-                    dataset_name: String::from("tinymarble"),
-                    file_name_format: String::from("tinymarble.png"),
-                    tick: None
-                }
-        };
-        
-
-        // TODO: get this from JSON -> add serde for Params...
-        /*
-        let source_params = SourceParams {
-                dataset_name: String::from("Meteosat"),
-                file_name_format: String::from("msg_%Y%m%d_%H%M.tif"),
-                tick: Some(Tick{
-                    year: 1,
-                    month: 1,
-                    day: 1,
-                    hour: 1,
-                    minute: 15,
-                    second: 60,
-                }),
-        };
-        */
-
-        // construct the source
-        let source = GdalSource::new(&self.base_path, source_params);
 
         // construct the query
         let query = SpatioTemporalRasterQuery{start_time: chrono_time, bbox: wms_bbox, pixel_size: (wms_width, wms_height)};
-        
-        // call a (raster) source and handle the result.
-        match source.pull(&query) {
+
+        // get source params        
+        let source_params = match map.find(&["layer"]) {
+            Some(&Value::String(ref name)) => self.load_params_from_json(name),
+            _ => Err(ErrorKind::MissingWmsParam("layer").into())
+        };
+
+        // construct the source, request and then create a response
+        match source_params.map(|sp| GdalSource::new(&self.base_path, sp))
+            .and_then(|source| source.pull(&query)) {
             // result is ok...
             Ok(data) => {
                 // create a new simple scaling colorizer
@@ -166,7 +145,7 @@ impl Handler for MappersHandler {
             }
             // result is an error. Return an error to Iron.
             Err(e) => {
-                let resp = Response::with((status::Ok, format!("source error: {}", e)));
+                let resp = Response::with((status::Ok, format!("Error: {}", e)));
                 Ok(resp)
             },
         }
