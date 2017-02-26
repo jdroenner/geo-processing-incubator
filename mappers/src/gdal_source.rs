@@ -1,7 +1,6 @@
 use std::path::Path;
 use gdal::raster::{Dataset, RasterBand};
 //use gdal::metadata::Metadata;
-use gdal;
 
 use errors::*;
 
