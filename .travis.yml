@@ -1,0 +1,23 @@
+language: rust
+sudo: required
+dist: trusty
+
+before_install:
+  - sudo add-apt-repository ppa:ubuntugis/ppa -y
+  - sudo apt-get update -q
+
+addons:
+ apt:
+  packages:
+    - build-essential
+    - libgdal-dev
+    - libgdal20
+
+rust:
+  - stable
+  - beta
+  - nightly
+
+script:
+  - cargo test
+  - cargo doc
