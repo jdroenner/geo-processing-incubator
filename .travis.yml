@@ -1,5 +1,5 @@
 language: rust
-sudo: required
+sudo: enabled
 dist: trusty
 
 before_install:
