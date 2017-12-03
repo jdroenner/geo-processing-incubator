@@ -1,5 +1,6 @@
 use gdal::errors::Error as GdalError;
 use serde_json::error::Error as SerdeJsonError;
+use image;
 
 error_chain! {
 
@@ -11,6 +12,7 @@ error_chain! {
         Io(::std::io::Error);
         SerdeJson(SerdeJsonError);
         GdalError(GdalError);
+        ImageError(image::ImageError);
     }
 
     errors {

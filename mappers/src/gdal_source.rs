@@ -1,13 +1,16 @@
 use std::path::Path;
-use gdal::raster::{Dataset, RasterBand};
+use gdal::raster::dataset::Dataset;
+use gdal::raster::rasterband::RasterBand;
 //use gdal::metadata::Metadata;
 
 use errors::*;
 
 use num::Integer;
+use std;
+use std::str::FromStr;
 
 use chrono::*;
-use mappers_handler::BoundingBox;
+//use mappers_handler::BoundingBox;
 
 #[derive(Eq, PartialEq, Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Tick {
@@ -39,12 +42,60 @@ impl Tick {
     }
 }
 
+
+// A struct representing a bounding box
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BoundingBox {
+    pub min_x: f64,
+    pub min_y: f64,
+    pub max_x: f64,
+    pub max_y: f64,
+}
+
+impl BoundingBox {
+    pub fn x(&self) -> (f64, f64) {
+        (self.min_x, self.max_x)
+    }
+
+    pub fn y(&self) -> (f64, f64) {
+        (self.min_y, self.max_y)
+    }
+}
+
+// implement a default value for a bounding box
+impl Default for BoundingBox {
+    fn default() -> BoundingBox {
+        BoundingBox {
+            min_x: -180.,
+            min_y: -90.,
+            max_x: 180.,
+            max_y: 90.,
+        }
+    }
+}
+
+impl FromStr for BoundingBox {
+    type Err = std::num::ParseFloatError;
+    fn from_str(str: &str) -> std::result::Result<BoundingBox, Self::Err>{
+        let buf: Vec<&str> = str.split(",").collect();
+        // return a new bounding box with the values from the params string.
+        let bbox = BoundingBox {
+            min_x: buf[0].parse()?,
+            min_y: buf[1].parse()?,
+            max_x: buf[2].parse()?,
+            max_y: buf[3].parse()?,
+        };
+
+        Ok(bbox)
+    }
+}
+
 pub trait Query {
      //TODO
 }
 
 pub trait Rasterized: Query {
-    fn resolution(&self) -> (u64, u64);
+    fn resolution(&self) -> (u32, u32);
 }
 
 pub trait Spatial: Query {
@@ -64,7 +115,7 @@ pub trait Temporal: Query {
 pub struct SpatioTemporalRasterQuery<T>{
     pub start_time: T,
     pub bbox: BoundingBox,
-    pub pixel_size: (u64, u64),
+    pub pixel_size: (u32, u32),
 }
 
 impl <T> Query for SpatioTemporalRasterQuery<T> {}
@@ -84,7 +135,7 @@ impl <T> Spatial for SpatioTemporalRasterQuery<T> {
 }
 
 impl <T> Rasterized for SpatioTemporalRasterQuery<T> {
-    fn resolution(&self) -> (u64, u64) {
+    fn resolution(&self) -> (u32, u32) {
         self.pixel_size
     }
 }

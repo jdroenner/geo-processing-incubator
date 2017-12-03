@@ -1,2 +1,2 @@
 [workspace]
-members = ["colorizers", "mappers"]
+members = ["colorizers", "mappers", "flow"]
