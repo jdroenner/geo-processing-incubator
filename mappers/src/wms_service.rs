@@ -67,7 +67,7 @@ impl hyper::server::Service for WmsService {
         let mappers_query = WmsService::build_query_from_params(&query_map);
         println!("mappers_query: {:?}", mappers_query);
 
-        let source_params: Result<SourceParams, errors::Error> = query_map.get("layer").ok_or(errors::ErrorKind::MissingWmsParam("layer").into()).and_then(|ref layer_name| self.load_params_from_json(layer_name));
+        let source_params: errors::Result<SourceParams> = query_map.get("layer").ok_or(errors::ErrorKind::MissingWmsParam{param: "layer"}.into()).and_then(|ref layer_name| self.load_params_from_json(layer_name));
         println!("source_params: {:?}", source_params);
 
         let x = source_params.map(|sp| GdalSource::new(&self.base_path, sp))
